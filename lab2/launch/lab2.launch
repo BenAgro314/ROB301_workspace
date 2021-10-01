@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="lab2" type="lab2.py" name="lab2" output="screen">
+  </node>
+</launch>
