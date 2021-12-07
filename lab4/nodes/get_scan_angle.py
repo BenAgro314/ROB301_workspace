@@ -12,7 +12,7 @@ import numpy as np
 def get_scan():
     scan = rospy.wait_for_message("scan", LaserScan)
 
-    calib_offset = 0.0317
+    calib_offset = 0.04
 
     # only use the scan where y >= 0 (i.e., to the left side of the robot)
     in_range = np.array(scan.ranges[0:180])

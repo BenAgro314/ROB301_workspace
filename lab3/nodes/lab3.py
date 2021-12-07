@@ -80,9 +80,9 @@ class PIDControl():
 	self.max_theta_vel = 0.5
 
 	# for 0.1 lin vel:
-	self.kp = 0.003#0.5/320.0
+	self.kp = 0.5/320.0
 	self.kd = 0.001
-	self.ki = 0.00015#self.kp/10
+	self.ki = 0
 
 	self.integral = 0
 	self.prev_error = 0
@@ -138,6 +138,8 @@ class RacerControl():
 	#self.ki = 0.0
 
 	self.kp = 0.009
+	# kd = 0.003 takes 26.86
+	# kd = 0.005 takes around the same time but it is less robust around corners
 	self.kd = 0.003
 	self.ki = 0.0
 
@@ -172,7 +174,7 @@ class RacerControl():
 	    print("Derivative:", derivative)
 	    correction = self.kp*error + self.ki*self.integral + self.kd*derivative
 	    lin_vel = self.x_vel
-	    if abs(error) > 300:
+	    if abs(error) > 270: #300
 		lin_vel = self.x_vel*((320.0-abs(error))/320.0)
 	    send_cmd(self._cmd_pub, np.clip(lin_vel, -0.26, 0.26), np.clip(correction, -1.82, 1.82))
 	    self.prev_error = error
@@ -183,7 +185,7 @@ if __name__=="__main__":
         settings = termios.tcgetattr(sys.stdin)
         
     rospy.init_node('Lab3')
-    clc = RacerControl
+    clc = PIDControl
     ctrl = clc()
     try:
         while(1):

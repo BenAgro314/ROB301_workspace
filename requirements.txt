@@ -1,0 +1,14 @@
+numpy==1.14.0
+opencv-python==3.2.0.6
+Pillow==6.0.0
+open3d==0.8.0.0
+scikit-image==0.14.2
+scikit-learn==0.19.1
+matplotlib==2.2.4
+pykitti==0.3.0
+easydict==1.6
+joblib==0.10.3
+tensorflow==1.4.0
+protobuf==3.9.1
+
+

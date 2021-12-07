@@ -1,0 +1,7 @@
+<launch>
+  <node pkg="lab4" type="localizer.py" name="lab4" output="log">
+  	</node>  
+  <node pkg="lab4" type="pid.py" name="pid" output="screen" required="true">
+  	</node>
+
+</launch>

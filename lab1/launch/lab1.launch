@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="lab1" type="motor.py" name="motor" output="screen">
+  </node>
+</launch>

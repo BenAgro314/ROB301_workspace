@@ -13,6 +13,50 @@ TURN_LIN_SPEED = 0.08 # m/s
 ROT_SPEED = 1 #  s^-1
 RADIUS = 0.25
 
+def sine(x, derivative = False):
+    # x == np.array([])
+    if derivative:
+        return 2*np.pi*np.cos(np.pi/0.25*x)
+    else:
+        return 0.50*np.sin(np.pi/0.25*x)
+
+
+
+def follow_sine(pub):
+    x = np.linspace(0, 25, 4)
+    y = sine(x)
+    x = np.array([x,y])
+    print(x)
+    for i in range(len(x[0])):
+        print(x[0][i], x[1][i])
+
+	current_point = np.array([x[0][i], x[1][i]])
+        next_point =  np.array([x[0][i+1], x[1][i+1]])
+	
+	delta_vec = np.array([x[0][i+1]-x[0][i], x[1][i+1]-x[1][i]])
+        theta_a = np.arctan2(sine(current_point[0], True), current_point[0])
+        theta_b = np.arctan2(sine(next_point[0], True), next_point[0])
+
+        theta_a = x_aw[-1]
+	theta_b = x_bw[-1]
+	x_aw = x_aw[:2].reshape(2,1)
+	x_bw = x_bw[:2].reshape(2,1)
+	C_aw = np.array([[np.cos(theta_a), np.sin(theta_a)], [-np.sin(theta_a), np.cos(theta_a)]])
+	dist_vec_a = C_aw.dot((x_bw - x_aw))
+	delta_theta = theta_b - theta_a
+	x_goal = np.array([dist_vec_a[0], dist_vec_a[1], delta_theta])
+	print(x_goal)
+	task1(x_goal, pub)
+    
+    
+
+
+
+
+
+
+
+
 def go_circle(radius, theta, pub, left = True):
     assert theta>0
     global TURN_LIN_SPEED
@@ -118,7 +162,8 @@ def publisher_node():
     #]
     #task2(x_list, cmd_pub)
     #go_circle(RADIUS, np.pi/2, cmd_pub, left = False)  
-    task3(np.array([2, 0.5, np.radians(135)]), cmd_pub)
+    #task3(np.array([2, 0.5, np.radians(135)]), cmd_pub)
+    follow_sine(cmd_pub)
 
 def main():
 

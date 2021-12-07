@@ -81,6 +81,7 @@ class KalmanFilter(object):
         # plots for TAs
         self.times = []
         self.xs = []
+	self.phis = []
         self.covs = []
 
     def cmd_callback(self, cmd_msg):
@@ -112,21 +113,25 @@ class KalmanFilter(object):
 
         self.x = self.predict(self.x , self.u) # state prediction, f(x,u)
         print('state prediction', self.x)
-        hat_phi = self.measurement_update(self.x) # measurment prediction, h(x)
-        print('measurment prediction', hat_phi)
-        s = self.phi - hat_phi # measurement residual
-        print('s', s)
-
-        # note: these are all scalars so we don't need to transpose
-        D = self.D(self.x) #D_{k+1}
-        # a priori state covariance, the B term is here if we want to include control input noise of covariance B (currently 0)
         self.P = self.A*self.P*self.A + self.Q 
-        S = D*self.P*D + self.R # a priori measurment covariance
-        W = self.P*D*(1.0/S) # kalman gain
-        self.P = self.P - W*S*W  # a posteriori state covariance
 
-        self.x = self.x + W*s # state update 
-        print('x', self.x)
+	if not math.isnan(self.phi):
+             # note: these are all scalars so we don't need to transpose
+             D = self.D(self.x) #D_{k+1}
+             # a priori state covariance, the B term is here if we want to include control input noise of covariance B (currently 0)
+             S = D*self.P*D + self.R # a priori measurment covariance
+             W = self.P*D*(1.0/S) # kalman gain
+             self.P = self.P - W*D*self.P#W*S*W  # a posteriori state covariance
+
+	     self.phis.append(self.phi)
+             hat_phi = self.measurement_update(self.x) # measurment prediction, h(x)
+             print('measurment prediction', hat_phi)
+             s = self.phi - hat_phi # measurement residual
+             print('s', s)
+             self.x = self.x + W*s # state update 
+             print('x', self.x)
+	else:
+	     self.phis.append(0)
         
         #rospy.loginfo("TODO: complete this function to update the state with current_input and current_measurement")
         # saving for plotting
@@ -152,6 +157,13 @@ class KalmanFilter(object):
         plt.savefig('kalman_filter_covs.png', dpi = 300)
         plt.close()
 
+        plt.plot(self.times, self.phis, label = 'Measurment')
+        plt.xlabel('Time (s)')
+        plt.ylabel('Phis')
+        plt.savefig('phis.png', dpi = 300)
+        plt.close()
+	
+
 
 if __name__=="__main__":
     if os.name != 'nt':
@@ -159,14 +171,14 @@ if __name__=="__main__":
         
     rospy.init_node('Lab4')
     #try:
-    h = 0.61 #y distance to tower
-    d = 0.61*3 #x distance to tower (from origin)  
+    h = 0.6 #y distance to tower
+    d = 0.6*3 #x distance to tower (from origin)  
     
     x_0 = 0 #initial state position
     
-    Q = 0.001**2 #TODO: Set process noise covariance (this is from pub_noisy_vel.py)
-    R = np.radians(2) #TODO: measurement noise covariance (from: https://emanual.robotis.com/docs/en/platform/turtlebot3/appendix_lds_01/, 1 degree resolution)
-    P_0 = 0.1 #m 
+    Q = 0.001 #TODO: Set process noise covariance (this is from pub_noisy_vel.py)
+    R = 0.0005 #np.radians(5) #TODO: measurement noise covariance (from: https://emanual.robotis.com/docs/en/platform/turtlebot3/appendix_lds_01/, 1 degree resolution)
+    P_0 = 0.05 #m 
 
     #localizer = BaselineLocalization(x_0)
     localizer = KalmanFilter(h, d, x_0, Q, R, P_0)

@@ -1,0 +1,9 @@
+<launch>
+  <node pkg="lab4" type="get_scan_angle.py" name="scan_angle" output="log">
+    </node> 
+  <node pkg="camera" type="camera" name="camera" output="log">
+  	</node>
+  <node pkg="lab4" type="pub_noisy_vel.py" name="noisyvel" output="screen" required="true">
+  	</node>
+
+</launch>
