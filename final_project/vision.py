@@ -65,8 +65,10 @@ def get_color_prob(color, rgb, mx = 4):
         tot += color_score(i, rgb)
     return color_score(color, rgb)/tot
 
+
+
 def plot_color_prob(name, rgb, mx = 4):
-    probs = np.array([get_color_prob(c, rgb, mx = 5) for c in range(0, mx)])
+    probs = np.array([get_color_prob(c, rgb, mx = mx) for c in range(0, mx)])
     fig = plt.figure()
     ax = fig.add_subplot(111)
     for i in range(0, mx):
@@ -87,5 +89,36 @@ def plot_color_prob(name, rgb, mx = 4):
     plt.savefig(os.path.join(dir_path, name), dpi = 400) 
     print(probs)
 
+def plot_color_prob_V2(name, rgb, mx = 4):
+    probs = np.array([get_color_prob(c, rgb, mx = mx) for c in range(0, mx)])
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    for i in range(0, mx):
+        x = i*100
+        norm = [p/255.0 for p in COLOR_CODES[i]]
+        rect = matplotlib.patches.Rectangle((x, 0), 100, 100, color=norm)
+        ax.text(x + 50, 50, str(round(probs[i], 2)) + "\n" + COLOR_TO_NAME[i], ha= "center")
+        ax.add_patch(rect)
+
+    rect = matplotlib.patches.Rectangle((100, 200), 200, 200, color=[c/255.0 for c in rgb])
+    ax.text(200, 300, "rgb: " + str(rgb), ha = "center")
+    ax.add_patch(rect)
+
+    plt.xlim([0, 100*mx])
+    plt.ylim([0, 100*mx])
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+
+    plt.savefig(os.path.join(dir_path, name), dpi = 400) 
+    print(probs)
+
+def p_rgb_given_color(rgb, color, kappa = np.pi):
+    h, _, _ = colorsys.rgb_to_hsv(rgb[0]/255.0, rgb[1]/255.0, rgb[2]/255.0)
+    rgb_true = COLOR_CODES[color]
+    h_true, _, _ = colorsys.rgb_to_hsv(rgb_true[0]/255.0, rgb_true[1]/255.0, rgb_true[2]/255.0)
+    d = np.pi*(h - h_true)
+    return np.exp(kappa*np.cos(d))/(2*np.pi*np.i0(kappa))
+    
+
 if __name__ == "__main__":
-    plot_color_prob("test.png",  [160, 155, 155], mx = 5)
+    print(p_rgb_given_color([201, 116, 133], RED))
+    print(p_rgb_given_color([120, 170, 132], RED))
